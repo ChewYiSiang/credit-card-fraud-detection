@@ -76,9 +76,9 @@ jupyter notebook credit-card-fraud-detection.ipynb
 
 The notebook reads the dataset from a Kaggle input path. Adjust the `pd.read_csv` path in the loading cell if running locally.
 
-## What I would do differently
+## Where I would take this next
 
-- **Pick the threshold from business cost, not F1.** F1 weights false positives and false negatives equally, which no fraud team actually wants. The right approach is a cost matrix (cost of a missed fraud versus cost of a blocked legitimate customer) and a threshold chosen to minimise expected cost. This is the single biggest gap between this notebook and a production system.
-- **Split by time, not at random.** Fraud patterns drift. A random split lets the model see the future, so the reported numbers are optimistic relative to how it would behave deployed against next month's transactions.
-- **Engineer velocity features properly.** `velocity_score` arrives precomputed. Rolling transaction counts over multiple windows (1h, 24h, 7d) would likely carry more signal than a single opaque score.
-- **Get the notebook out of the notebook.** The pipeline is reproducible by hand but not automated. Extracting it into modules with a proper train/evaluate entrypoint would make the results reproducible by someone other than me.
+- **Choose the threshold from business cost rather than F1.** F1 weights false positives and false negatives equally, which is rarely what a fraud team wants. Defining a cost matrix over a missed fraud versus a blocked legitimate customer, then selecting the threshold that minimises expected cost, would turn the precision/recall tradeoff into a decision the business can sign off on. This is the most valuable extension available here.
+- **Validate across time as well as at random.** Fraud patterns drift, so a temporal split would show how much of the 0.451 PR-AUC survives against a later period. That number is the more honest estimate of deployed performance, and comparing the two quantifies the drift directly.
+- **Engineer velocity features from raw transactions.** `velocity_score` arrives precomputed. Rolling counts over multiple windows (1h, 24h, 7d) would expose the underlying behaviour to the model, and are a natural place to look for signal beyond the current feature set.
+- **Lift the pipeline out of the notebook.** Extracting the flow into modules with a train and evaluate entrypoint would make the results reproducible by anyone, and opens the path to serving the model behind an API.
